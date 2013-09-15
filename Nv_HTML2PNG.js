@@ -5,7 +5,7 @@ function Nv_HTML2CANVAS(canvas_id,html_id,callback){
 	if(fileArray == null){
 		fileArray = ["/bgimage/black.png"];
 	}
-	console.log(fileArray);
+	//console.log(fileArray);
 	var numMaterials = fileArray.length;
 	var loadedCounter = 0;
 	var imgObjArray = [];
@@ -72,16 +72,18 @@ Nv.HTML2CANVAS = function(canvas_id,html_id,callback){
 	//背景
 	tabIdArray.push($(html_id).find("div").attr("id"));
 	try{
-			fileArray.push( $(html_id).find("div").css("background-image").slice(4,-1) );
+			fileArray.push( $(html_id).find("div").css("background-image").slice(4,-1).replace("\"","").replace("\"",""));
+			//console.log($(html_id).find("div").css("background-image").slice(4,-1).replace("\"","").replace("\"",""));
 			// 上のは文字要素でないとsliceが使えない
 			//img要素
 			var imgtab = $(html_id).find("img");
 			while(imgtab.attr("src") != undefined){
 					tabIdArray.push(imgtab.attr("id"));
 					fileArray.push( imgtab.attr("src") );
-					//console.log(imgtab);
 					imgtab = imgtab.next();
 			}
+			//console.log(imgtab);
+			//console.log(tabIdArray);
 	}catch(e){
 		fileArray.push("/bgimage/black.png");
 	}
@@ -131,25 +133,38 @@ Nv.HTML2CANVAS = function(canvas_id,html_id,callback){
 						top = position.top;
 						left = position.left;
 						width= $("#" + tabIdArray[i]).width();
-						height = $("#" + tabIdArray).height();
+						height = $("#" + tabIdArray[i]).height();
 					}catch(e){
 						top = 0;
 						left = 0;
 						width = 1024;
 						height = 576;
 					}
-		//			console.log(top);
-		//			console.log(left);
-		//			console.log(width);
-		//			console.log(height);
-		//
 					
 					ctx.drawImage(imgObjArray[i],
-								   	canvas_width/2/html_width*parseFloat(left),
+								   	150./html_width*parseFloat(left),
 								   	83./html_height*parseFloat(top),
-									canvas_width/2/html_width*parseFloat(width),
+									150./html_width*parseFloat(width),
 									83./html_height*parseFloat(height)
 									);
+
+					//console.log(imgObjArray[i]);
+
+				   	//console.log(canvas_width);
+				   	//console.log(canvas_height);
+				   	//console.log(html_width);
+				   	//console.log(html_height);
+
+					//console.log(top);
+                    //console.log(left);
+                    //console.log(width);
+                    //console.log(height);
+
+				   	//console.log(canvas_width/2./html_width*parseFloat(left));
+				   	//console.log(83./html_height*parseFloat(top));
+					//console.log(canvas_width/2./html_width*parseFloat(width));
+					//console.log(83./html_height*parseFloat(height));
+					
 					imgObjArray[i] = null;
 			}
 			callback(canvas.toDataURL());

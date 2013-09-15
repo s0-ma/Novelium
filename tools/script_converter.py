@@ -1,5 +1,8 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
+
+#このプログラムは、Novelium Scriptの会話文整形を行うためのものです。
+
 import sys
 
 def splitStr(str, num):

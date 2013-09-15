@@ -74,6 +74,7 @@ var Nv_Sound = function(isTiApp){
 
 		this.loopEvent = function(){
             self.sound.currentTime = 0;
+			self.sound.src = self.sound.src;
             self.play();
 		}
 
@@ -153,7 +154,14 @@ var Nv_Audio = function(isTiApp){
 				self.audio_bgm.setVolume(vol);
 		};
 		this.BGM_play = function(){
-				self.audio_bgm.play();
+				if(inFadeOut == false){
+					self.audio_bgm.play();
+				}else{
+					_fadeout_animation.stop();
+					self.audio_bgm.stop();
+					self.audio_bgm.play();
+					inFadeOut = false;
+				}
 		};
 		this.BGM_stop = function(){
 
@@ -197,9 +205,9 @@ var Nv_Audio = function(isTiApp){
 						_bgm_fadeout_tmp_vol = self.audio_bgm.getVolume();
 						_bgm_fadeout_timer = setInterval(function(){self._down()},parseFloat(time)/5.);
 				}else{
-						$(self.audio_bgm.getObject()).animate(
+						_fadeout_animation = $(self.audio_bgm.getObject()).animate(
 										{ volume: 0 }, 
-										{easing: "swing",duration: time,callback: function(){self.audio_bgm.stop(); }
+										{easing: "swing",duration: time,complete: function(){self.audio_bgm.stop(); }
 										});
 				}
 		};

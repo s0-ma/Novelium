@@ -66,25 +66,25 @@ Nv_Tags.Disp.fadeIn = function(time){
 	}
 };
 
-Nv_Tags.Disp.shake_v = function(dy,time){
+Nv_Tags.Disp.shake_v = function(time){
 	var timer = setInterval(function(){
-					$("#layer_scenario_main").animate({ top: -dy }, 75).animate({ top: dy }, 75);
-				},150);
-	nv_scripter.dfdObj().notify();
+					$("#container").animate({ top: "49%" }, 25).animate({ top: "51%" }, 25);
+				},50);
 	setTimeout(function(){
 					clearInterval(timer);
-					$("#layer_scenario_main").animate({ top: 0 }, 75);
+					$("#container").animate({ top: "50%" }, 25);
+					nv_scripter.dfdObj().notify();
 				},time);
 };
 
-Nv_Tags.Disp.shake_h = function(dx,time){
+Nv_Tags.Disp.shake_h = function(time){
 	var timer = setInterval(function(){
-					$("#layer_scenario_main").animate({ left: -dx }, 75).animate({left: dx }, 75);
-				},150);
-	nv_scripter.dfdObj().notify();
+					$("#container").animate({ left: "49.5%" }, 25).animate({left: "50.5%" }, 25);
+				},50);
 	setTimeout(function(){
 					clearInterval(timer);
-					$("#layer_scenario_main").animate({ left: 0 }, 75);
+					$("#container").animate({ left: "50%" }, 25);
+					nv_scripter.dfdObj().notify();
 				},time);
 };
 
@@ -110,7 +110,7 @@ Nv_Tags.Audio.se_play = function(path){
 	nv_scripter.dfdObj().notify();
 }
 
-//werfoo:SE stop
+//Weri:SE stop
 Nv_Tags.Audio.se_stop = function(){
 	nv_audio.Effect1_stop();
 	nv_scripter.dfdObj().notify();
@@ -165,39 +165,49 @@ Nv_Tags.Trans.out_left = function(){
 
 
 /**********Hiduke**********/
-//werfoo:日付の位置と幅（日10の位、１の位、曜日、天気の順）
-var hiduke_Offset = [15, 35, 109, 160];
-var hiduke_Item_Width =[25,25,24,39]
+//Weri:日付の位置と幅（日10の位、１の位、曜日、天気の順）
+var hiduke_Offset = [15, 35, 109, 160];//画面表示の位置
+var hiduke_Item_Width =[25,25,24,39];//画像切り取りの大きさ
 
-Nv_Tags.Hiduke_Set = function(hiduke_order_id, hiduke_Num_input){
-
+Nv_Tags.Hiduke_Set = function(hiduke_order_id, hiduke_Num_input, left_offset, clip_offset){
+        //hiduke_order_id = 1, 2, 3, 4
+        //num_input ↓
+        //１～７⇔月火水木金土日
+        //1,2,3⇔晴、曇、雨
+        if(typeof left_offset === "undefined"){
+            left_offset = 0;
+        }
+        if(typeof clip_offset === "undefined"){
+            clip_offset = 0;
+        }
 	var hiduke_Num = 0;
-	if(hiduke_Num_input==0){
-		hiduke_Num = 10;
+	if(hiduke_Num_input == 0){//日付が一桁の場合は10の位を0にしたい
+		hiduke_Num = 10;//画像ファイルで10こめに0がある
 	}else{
 		hiduke_Num = hiduke_Num_input;
 	}
-	
+
+        //ex) #hiduke_number0 は十の位を収める要素	
 	var hiduke_id = "#hiduke_number" + hiduke_order_id;
 
 	var hiduke_Width = hiduke_Item_Width[hiduke_order_id-1];
-	var hiduke_Pos = hiduke_Offset[hiduke_order_id-1] - (hiduke_Num-1)*hiduke_Width;
+        //画面左端から日付要素の表示位置までの距離
+        var hiduke_Pos = hiduke_Offset[hiduke_order_id-1] - (hiduke_Num-1)*hiduke_Width + left_offset;
 
-	var clipvalue = "rect(auto "
-					+hiduke_Num*hiduke_Width
-					+"px auto "
-					+(hiduke_Num-1)*hiduke_Width
-					+"px)";
+        //数字と曜日が並んだ画像ファイル上の切り取り位置
+        var clip_start = hiduke_Num * hiduke_Width+clip_offset;
+        var clip_end = (hiduke_Num-1)*hiduke_Width+clip_offset;
+	var clipvalue = "rect(auto "+clip_start+"px auto "+clip_end+"px)";
+        //画像の切り取り
 	$(hiduke_id).css("clip", clipvalue);
+        //画面への貼り付け
 	$(hiduke_id).css("left", hiduke_Pos);
-
-	nv_scripter.dfdObj().notify();
-
 }
 
 Nv_Tags.Hiduke = function(hidukenumber){
 	hiduke_value_1st = Math.floor(hidukenumber/10);
 	hiduke_value_2nd = hidukenumber%10;
+
 	Nv_Tags.Hiduke_Set(1,hiduke_value_1st);
 	Nv_Tags.Hiduke_Set(2,hiduke_value_2nd);
 	Nv_Tags.Youbi(hidukenumber%7);
@@ -205,14 +215,23 @@ Nv_Tags.Hiduke = function(hidukenumber){
 	nv_scripter.dfdObj().notify();
 }
 
+//日付と曜日を同時に?にする特別なタグ
+Nv_Tags.Hiduke_Unknown = function(){
+        Nv_Tags.Hiduke_Set(1, 11);
+        Nv_Tags.Hiduke_Set(2, 11);
+        Nv_Tags.Hiduke_Set(3, 8, -4, 7);//日付の画像だけ?の位置がずれている
+	nv_scripter.dfdObj().notify();
+}
+
 //１～７⇔月火水木金土日
+//called only from Nv_Tags.Hiduke, Nv_Tags.Hiduke_Unknown
 Nv_Tags.Youbi = function(youbinumber){
 	if(youbinumber == 0){
 		Nv_Tags.Hiduke_Set(3,7);
 	}else{
 		Nv_Tags.Hiduke_Set(3,youbinumber);
 	}
-	nv_scripter.dfdObj().notify();
+//	nv_scripter.dfdObj().notify();
 }
 
 //1,2,3⇔晴、曇、雨
@@ -241,7 +260,7 @@ var Character = function(path,v,h,called_from_init){
 
 	var self = this;
 
-	/*public property*/
+	/*property*/
 	this.path = path; // ex: character/ame/ame.png
 	this.id = path.replace(/\//g,"").replace(/\./g,"");// ex: characterameamepng
         this.name = path.split("/")[1];// ex: ame
@@ -252,6 +271,8 @@ var Character = function(path,v,h,called_from_init){
 	this.showswitch = 0;
         this.current_face_name = "normal";
         //this.face_number_info = {};// {"ikari":2, "naki":3,...} from json file
+        this.emoticon_v = 0;
+        this.emoticon_h = 0;
 
 	/*constructor*/
         Nv_Tags.characters.push(this);
@@ -263,11 +284,34 @@ var Character = function(path,v,h,called_from_init){
 	        nv_scripter.dfdObj().notify();
                 //console.log("img.onload called from script");
             }else{
+                character_load_dfdObj.notify();
                 //console.log("img.onload called from init");
             }
         }
 
-	/*method*/
+	/*methods*/
+
+        /*emoticon*/
+        this.set_emoticon_default_position = function(v_position, h_position){
+            self.emoticon_v = v_position;
+            self.emoticon_h = h_position;
+	    nv_scripter.dfdObj().notify();
+        }
+        this.emoticon = function(emoticon_name, v_from_default, h_from_default){
+            if(typeof v_from_default === "undefined"){v_from_default = 0;}
+            if(typeof h_from_default === "undefined"){h_from_default = 0;}
+            var filename = "system/" + emoticon_name;
+            $("#scenario_img").append("<img id=\""+self.id+"_emo_" +emoticon_name+ "\"" 
+		+"src=\""+filename + ".png"+"\""
+		+"style=\"position:absolute; top:"
+		+parseInt(self.v+self.emoticon_v+v_from_default)+"px;left:"
+		+parseInt(self.h+self.emoticon_h+h_from_default)+"px;\">");
+	    nv_scripter.dfdObj().notify();
+        }
+        this.hide_emoticon = function(){
+            $("[id^="+self.id+"_emo]").remove();
+	    nv_scripter.dfdObj().notify();
+        }
         /* show will called from only "showface"*/
 	this.show = function(h_position){
 		$("#scenario_img").append("<img id=\"" + self.id + "\" src=\""+self.path+"\" style=\"display:none;position:absolute; top:"+self.v+"px; left:"+self.h+"px; \">");
@@ -281,7 +325,8 @@ var Character = function(path,v,h,called_from_init){
 				nv_scripter.dfdObj().notify();
 		}else{
 				//$("#"+self.id).fadeIn("slow",function(){nv_scripter.dfdObj().notify();});
-				$("#"+self.id).fadeIn("slow");
+				//$("#"+self.id).fadeIn("slow");
+				$("#"+self.id).show();
 				nv_scripter.dfdObj().notify();
 		}
 	}; 
@@ -334,7 +379,8 @@ var Character = function(path,v,h,called_from_init){
 		var face_id_random = Math.floor(Math.random()*(maxnumber+1));
 		self.face[face_name][4] = face_id_random;
 		self.current_face_name = face_name;
-		
+	
+		$("#"+self.id+"_"+face_name).remove();
 		$("#scenario_img").append("<img id=\""+self.id+"_"+face_name+ "\"" 
 			+"src=\""+filename+ "_"+face_id_random + ".png"+"\""
 			+"style=\"display:none;position:absolute; top:"
@@ -344,7 +390,8 @@ var Character = function(path,v,h,called_from_init){
 				$("#"+self.id+"_"+face_name).show();
 				nv_scripter.dfdObj().notify();
 		}else{
-				$("#"+self.id+"_"+face_name).fadeIn("slow");
+				$("#"+self.id+"_"+face_name).show();
+				//$("#"+self.id+"_"+face_name).fadeIn("slow");
 				nv_scripter.dfdObj().notify();
 				//$("#"+self.id+"_"+id).fadeIn("slow",function(){nv_scripter.dfdObj().notify();});
 		}
@@ -375,9 +422,11 @@ var Character = function(path,v,h,called_from_init){
 	};
 };
 
+character_load_dfdObj = new jQuery.Deferred();
 /*Initialization of all characters with two or more faces*/
 /*This treatment is needed because characters have to initilized after JSON file loaded*/
 Nv_Tags.init_characters = function(){
+    n_unloaded_character = 0;
     //face_info.json is like this
     //[{"name":"ame", "diff":{"douyou":0,"egao":2, ... },
     //{"name":"iijima", "diff":{"gekido":0,"hohoemi":2, ...},
@@ -385,6 +434,7 @@ Nv_Tags.init_characters = function(){
     //}]
     $.getJSON("../character/face_info.json", function(data){
         data.forEach(function(element){
+            n_unloaded_character++;
             var path = "character/" + element.name + "/" + element.name + ".png";
             // ex: path = "character/ame/ame.png"
             var str =element.name + " = new Character(\"" + path + "\",0,0,1);";
@@ -397,12 +447,18 @@ Nv_Tags.init_characters = function(){
             }
         });
     });
-    nv_scripter.dfdObj().notify();
+    character_load_dfdObj.progress(function(){
+        //check the number of character image unloaded
+        n_unloaded_character--;
+        if(n_unloaded_character == 0){
+            nv_scripter.dfdObj().notify();
+        }
+    });
 };
 
 Nv_Tags.ToEnding = function(){
 	$("*").unbind("click");
-        console.log("toending");
+        //console.log("toending");
         nv_scripter.dfdObj().notify();
 	$("#container").fadeOut(500,function(){
 		nv_audio.BGM_stop();

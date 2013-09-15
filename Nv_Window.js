@@ -111,4 +111,3 @@ var Nv_Window = function(isTiApp){
 	}
 
 };
-

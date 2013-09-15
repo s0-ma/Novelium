@@ -69,6 +69,7 @@ var Nv_Scripter = function(){
 			//処理を行うと、終了時にNv_tag.js内のnv_scripter.dfdObj().notify()が呼ばれれて
 			//以下が実行されるようcallbackとして登録
 			dfdObj.progress(function(){
+                                        
 					dfd_num--;
 					if(dfd_num==0){
 						//console.log("0段落目読み込み終了");
@@ -150,7 +151,23 @@ var Nv_Scripter = function(){
 					//会話文
 					if(self.script_sent[i][k].indexOf("%",0) == 0){
 						log_name = self.script_sent[i][k].split(" ",2)[0].substring(1);
-						log_sent = self.script_sent[i][k].split(" ",2)[1];
+						//log_sent = self.script_sent[i][k].split(" ",2)[1];
+						//log文章の改行処理
+						log_sent_base = self.script_sent[i][k].split(" ",2)[1];
+						if(log_sent_base.length < 30){
+								log_sent = log_sent_base;
+						}else{
+								log_sent = "";
+								log_sent += log_sent_base.substring(0,31) + "<br>";
+								for(raw_num = 1; raw_num < (log_sent_base.length/31) ;raw_num++){
+										if(raw_num != log_sent_base.length/31){
+											log_sent += "　　　　　" + log_sent_base.substring(31*raw_num,31*(raw_num+1)) + "<br>";
+										}else{
+											log_sent += "　　　　　" + log_sent_base.substring(31*raw_num,31*(raw_num+1));
+										}
+
+								}
+						}
 						log_isNewLine = (log_isPrevSpeaker != log_name);
 						log_isPrevSpeaker = log_name;
 
@@ -172,7 +189,25 @@ var Nv_Scripter = function(){
 					//地の文
 					}else{
 						log_name = "";
-						log_sent = self.script_sent[i][k];
+						//log_sent = self.script_sent[i][k];
+						
+						//log文章の改行処理
+						log_sent_base = self.script_sent[i][k];
+						if(log_sent_base.length < 30){
+								log_sent = log_sent_base;
+						}else{
+								log_sent = "";
+								log_sent += log_sent_base.substring(0,30) + "<br>";
+								for(raw_num = 1; raw_num < (log_sent_base.length/31) ;raw_num++){
+										if(raw_num != log_sent_base.length/31){
+											log_sent += "　　　　　" + log_sent_base.substring(31*raw_num-1,31*(raw_num+1)-1) + "<br>";
+										}else{
+											log_sent += "　　　　　" + log_sent_base.substring(31*raw_num-1,31*(raw_num+1)-1);
+										}
+
+								}
+						}
+
 						log_isNewLine = (log_isPrevSpeaker != log_name);
 						log_isPrevSpeaker = log_name;
 					
@@ -266,6 +301,8 @@ var Nv_Scripter = function(){
 
 			//自動で文章が進んでいく場合、
 			if(self.isPrinting && self.speed!=0){
+			//以下の場合は文字送り中のクリック抑制。
+			//if(true){
 				//ここでスクリプト文章中のhtmlの解釈をする
 				speed_factor = 1;
 				if(self.script_sent[self.para][self.sent].substring(self.count).indexOf("、",0) == 0){
@@ -295,7 +332,7 @@ var Nv_Scripter = function(){
 				self.count++;
 				//まだ次に文字があるなら、
 				if(self.count < self.script_sent[self.para][self.sent].length){
-					setTimeout(_go,self.speed * speed_factor);
+					setTimeout(_go,(100-self.speed) * speed_factor);
 				//終端なら、
 				}else{
 					self.sent++;
